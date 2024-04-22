@@ -5,7 +5,8 @@ authors = ["Brett Etter <brett.etter@staratlas.com>"]
 description = "`wasm-bindgen` that can be `cfg`'d"
 keywords = ["proc_macro", "procmacro"]
 edition = "2021"
-publish = ["star-atlas"]
+publish = ["star-atlas", "crates-io"]
+repository = "https://github.com/staratlasmeta/wasm_bindgen_cfg"
 
 [lib]
 proc-macro = true
