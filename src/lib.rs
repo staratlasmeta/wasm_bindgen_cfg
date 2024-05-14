@@ -1,7 +1,11 @@
-use proc_macro2::TokenStream;
-use proc_macro_error::{abort_call_site, proc_macro_error};
-use quote::{format_ident, quote};
-use syn::{parse_macro_input, Attribute, FnArg, ForeignItem, ImplItem, Item, Signature, TraitItem};
+use proc_macro_error::{abort_call_site, proc_macro_error, OptionExt};
+use quote::{format_ident, quote, ToTokens};
+use syn::parse::Parser;
+use syn::punctuated::Punctuated;
+use syn::{
+    parse_macro_input, Attribute, FnArg, ForeignItem, ImplItem, Item, Meta, Signature, Token,
+    TraitItem,
+};
 
 #[proc_macro_error]
 #[proc_macro_attribute]
@@ -16,14 +20,24 @@ pub fn wasm_bindgen_cfg(
     let mut input_no_wasm = input.clone();
 
     filter_item(&mut input_no_wasm, filter_func);
-    let args = TokenStream::from(args);
+    let attr_parser = Punctuated::<Meta, Token![,]>::parse_terminated;
+    let args: Punctuated<Meta, Token![,]> = attr_parser.parse(args).unwrap();
+    let cfg_args = args
+        .first()
+        .expect_or_abort("Expected at least 1 argument for the cfg attribute")
+        .to_token_stream();
+
+    let bindgen_args = args
+        .into_iter()
+        .skip(1)
+        .collect::<Punctuated<Meta, Token![,]>>();
 
     (quote! {
-        #[cfg(#args)]
-        #[::wasm_bindgen::prelude::wasm_bindgen]
+        #[cfg(#cfg_args)]
+        #[::wasm_bindgen::prelude::wasm_bindgen(#bindgen_args)]
         #input
 
-        #[cfg(not(#args))]
+        #[cfg(not(#cfg_args))]
         #input_no_wasm
     })
     .into()
