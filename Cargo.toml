@@ -1,6 +1,6 @@
 [package]
 name = "wasm_bindgen_cfg"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Brett Etter <brett.etter@staratlas.com>"]
 description = "`wasm-bindgen` that can be `cfg`'d"
 keywords = ["proc_macro", "procmacro"]
